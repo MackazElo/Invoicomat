@@ -20,7 +20,48 @@ app.use("/", express.static("public"));
 app.use(fileUpload());
 
 app.post("/extract-text", (req, res) => {
-    
+    async function get_sku(supplier, sku) {
+        function fetch_sku(supplier) {
+            return new Promise((resolve, reject) => {
+            var query = `SELECT sku FROM mobileparts WHERE supplier_code = "${supplier}"`;
+                    database.query(query, function(error, data){
+                            resolve(data)
+                        });
+            });
+        }
+        function update_sku(data) {
+            return new Promise((resolve, reject) => {
+                var query = `INSERT INTO mobileparts (id, supplier_code, sku) VALUES ("", "${supplier}", "${sku}")`;
+                        database.query(query, function(error, data){
+                            console.log("SKU DB updated")
+                        
+                            resolve(sku)
+                        })
+                    })
+        }
+        
+        function select_sku(val) {
+            return new Promise((resolve, reject) => {
+                    var splited = stringify(val[0])
+                    splited = splited.split("=")
+                    console.log("SKU found")
+                  
+                    resolve(splited[1])
+                        })
+        }
+    try {
+        var data = await fetch_sku(supplier);
+        if(data==""&&sku!=""){
+            data = await update_sku(supplier, sku); 
+        }
+        else{
+            data = await select_sku(data); 
+        }
+        return(data)
+    } catch (error) {
+        console.error('Error:', error);
+    }
+    }
     async function pdf_main(){
     if (!req.files && !req.files.pdfFile) {
         res.status(400);
@@ -62,9 +103,10 @@ app.post("/extract-text", (req, res) => {
                             cell_number = 0
                             table += `<td>` 
                             cell_number++
+                            var corretct_sku = get_sku(item, "")
                             
-                            table += `<div class="autocomplete" ><input  id='${row_number}_${cell_number}' name='r${row_number}_c${cell_number}a' type="text" placeholder="SKU"></div><br>`;       
-                            table += `<div class="autocomplete" ><input  id='${row_number}_${cell_number}b' name='r${row_number}_c${cell_number}' type="text" placeholder="Part Name"></div>`;       
+                            table += `<div class="autocomplete" ><input  id='${row_number}_${cell_number}' name='r${row_number}_c${cell_number}a' type="text" value='${corretct_sku}' placeholder="SKU" onclick="autocomplete(document.getElementById('${row_number}_${cell_number}'), sku_code);"></div><br>`;       
+                            table += `<div class="autocomplete" ><input  id='${row_number}_${cell_number}b' name='r${row_number}_c${cell_number}' type="text" placeholder="Part Name" onclick="autocomplete(document.getElementById('${row_number}_${cell_number}b'), part_name);"></div>`;       
                        
                             // autocomplete(document.getElementById(`${row_number}_${cell_number}`), sku_code);
                             // autocomplete(document.getElementById(`${row_number}_${cell_number}b`), part_name);
