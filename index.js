@@ -4,7 +4,7 @@ const pdfParse = require("pdf-parse");
 const excel = require('excel4node');
 const bodyParser = require("body-parser")
 
-const { stringify } = require("querystring");
+const { stringify } = require("querystring")
 var database = require('./database');
 
  
