@@ -4,6 +4,7 @@ var database = require('./database');
 
 const bodyParser = require("body-parser");
 const { stringify } = require("querystring");
+const { AuthSwitchRequestPacket } = require("mysql/lib/protocol/packets");
 
 const app = express();
 
@@ -17,36 +18,31 @@ app.use("/", express.static("public"));
 app.post("/check", (req, res) => {
     var supplier =  String(req.body.supplier);
     var sku = String(req.body.sku);
-    function auto_sku(supplier, sku){
-        var found_sku = new Promise((resolve, reject)=>{
+
+    async function auto_sku(supplier, sku){
+        var query = `SELECT sku FROM mobileparts WHERE supplier_code = "${supplier}"`;
+        var b = "b"
+        var a = await database.query(query, function(error, data){
+            b = data
+        });
+        return b
+
+    });
+    }
+        
             var query = `SELECT sku FROM mobileparts WHERE supplier_code = "${supplier}"`;
             database.query(query, function(error, data){
                     resolve(data)
                 });
             });
-         found_sku.then((val)=>{
-            if(val==""){
-                var query = `INSERT INTO mobileparts (id, supplier_code, sku) VALUES ("", "${supplier}", "${sku}")`;
-                database.query(query, function(error, data){
-                    console.log("SKU DB updated")
-                    console.log(sku)
-                    sku_log(sku)
-                });
-            } 
-            else{
-                var splited = stringify(val[0])
-                splited = splited.split("=")
-                console.log("SKU found")
-                console.log(splited[1])
-                sku_log(splited[1])
-                
-            }
-        })
+
+        
+    
+    async function sku_log(){
+        let response = await auto_sku(supplier, sku)
+         console.log("R "+response)
     }
-    function sku_log(sku){
-        console.log(sku)
-    }
-    auto_sku(supplier, sku)
+    sku_log()
     console.log("after")
 });
 
