@@ -30,7 +30,7 @@ app.post("/check", (req, res) => {
                 database.query(query, function(error, data){
                     console.log("SKU DB updated")
                     console.log(sku)
-                    return(sku)
+                    sku_log(sku)
                 });
             } 
             else{
@@ -38,12 +38,16 @@ app.post("/check", (req, res) => {
                 splited = splited.split("=")
                 console.log("SKU found")
                 console.log(splited[1])
-                return(splited[1])
+                sku_log(splited[1])
                 
             }
         })
     }
-   console.log("a"+auto_sku(supplier, sku))
+    function sku_log(sku){
+        console.log(sku)
+    }
+    auto_sku(supplier, sku)
+    console.log("after")
 });
 
 app.listen(5500);
