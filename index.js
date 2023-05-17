@@ -3,6 +3,10 @@ const fileUpload = require("express-fileupload");
 const pdfParse = require("pdf-parse");
 const excel = require('excel4node');
 const bodyParser = require("body-parser")
+
+const { stringify } = require("querystring");
+var database = require('./database');
+
  
 
 
@@ -27,8 +31,53 @@ app.post("/extract-text", (req, res) => {
 });
 
 app.post("/excel", (req, res) => {
-    
-    var last_serial =  String(req.body.last_serial);
+    async function mainn(){
+
+        
+        async function get_sku(supplier, sku) {
+            function fetch_sku(supplier) {
+                return new Promise((resolve, reject) => {
+                var query = `SELECT sku FROM mobileparts WHERE supplier_code = "${supplier}"`;
+                        database.query(query, function(error, data){
+                                resolve(data)
+                            });
+                });
+            }
+            function update_sku(data) {
+                return new Promise((resolve, reject) => {
+                    var query = `INSERT INTO mobileparts (id, supplier_code, sku) VALUES ("", "${supplier}", "${sku}")`;
+                            database.query(query, function(error, data){
+                                console.log("SKU DB updated")
+                            
+                                resolve(sku)
+                            })
+                        })
+            }
+            
+            function select_sku(val) {
+                return new Promise((resolve, reject) => {
+                        var splited = stringify(val[0])
+                        splited = splited.split("=")
+                        console.log("SKU found")
+                      
+                        resolve(splited[1])
+                            })
+            }
+        try {
+            var data = await fetch_sku(supplier);
+            if(data==""){
+                data = await update_sku(supplier, sku); 
+            }
+            else{
+                data = await select_sku(data); 
+            }
+            return(data)
+        } catch (error) {
+            console.error('Error:', error);
+        }
+        }
+        var last_serial =  String(req.body.last_serial);
+
     var max_rows = String(req.body.max_rows);
 
     var excel = require('excel4node');
@@ -57,7 +106,9 @@ app.post("/excel", (req, res) => {
     
 
      for(i=1; i<=max_rows; i++){
-        console.log(String(eval(`req.body.r${i}_c1`)));
+        var name = String(eval(`req.body.r${i}_c1`));
+        var sku = String(eval(`req.body.r${i}_c1a`));
+        var supplier = String(eval(`req.body.r${i}_c2`));
         var price = String(eval(`req.body.r${i}_c4`));
         var quantity = String(eval(`req.body.r${i}_c5`));
         price = price.replace('€ ', "");
@@ -66,7 +117,9 @@ app.post("/excel", (req, res) => {
         var serials = generate_serial(last_serial, quantity);
         console.log(last_serial)
 
-        worksheet.cell(i+1,1).string(String(eval(`req.body.r${i}_c1`))).style(style);
+        var corretct_sku = await (get_sku(supplier, sku))
+
+        worksheet.cell(i+1,1).string(name).style(style);
         worksheet.cell(i+1,2).string(quantity).style(style);
         worksheet.cell(i+1,3).string(serials).style(style);
         worksheet.cell(i+1,4).string("").style(style);
@@ -75,6 +128,7 @@ app.post("/excel", (req, res) => {
         worksheet.cell(i+1,7).string("0").style(style);
         worksheet.cell(i+1,8).string("0").style(style);
         worksheet.cell(i+1,9).string("0").style(style);
+        worksheet.cell(i+1,10).string(corretct_sku).style(style);
     }
 
     
@@ -109,8 +163,8 @@ app.post("/excel", (req, res) => {
         return serial_result
 
     }
-
-    
+    }
+    mainn()
 });
 
 app.listen(5000);
