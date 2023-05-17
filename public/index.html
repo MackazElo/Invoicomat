@@ -83,7 +83,8 @@ table, tr, td{
 
         <br>
         <br>
-        <textarea style="width: 300px; height: 150px;" id="resultText" placeholder="Your PDF text will appear here..." ></textarea>
+        <!-- <textarea style="width: 300px; height: 150px;" id="resultText" placeholder="Your PDF text will appear here..." ></textarea> -->
+        <div id="resultText"></div>
         <script>
             const inpFile = document.getElementById("inpFile");
             const btnUpload = document.getElementById("btnUpload");
@@ -101,7 +102,7 @@ table, tr, td{
                 }).then(response => {
                     return response.text();
                 }).then(extractedText => {
-                    resultText.value = extractedText.trim();
+                    resultText.innerHTML = extractedText.trim();
                 });
                 
                 setTimeout(() => {  extract_fromtext(); }, 300);

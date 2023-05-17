@@ -20,14 +20,113 @@ app.use("/", express.static("public"));
 app.use(fileUpload());
 
 app.post("/extract-text", (req, res) => {
+    
+    async function pdf_main(){
     if (!req.files && !req.files.pdfFile) {
         res.status(400);
         res.end();
     }
+    var pdf_as_text = await pdfParse(req.files.pdfFile)
+    var formated_result = ""
 
-    pdfParse(req.files.pdfFile).then(result => {
-        res.send(result.text);
-    });
+    
+          
+                var input_text = pdf_as_text.text
+                 input_text = input_text.split(/\r?\n/);
+                 console.log(input_text)
+                // document.getElementById("shop_input").value = result[8]
+                // Find a <table> element with id="myTable":
+                // var table = document.getElementById("invoice_table");
+
+                // Create an empty <tr> element and add it to the 1st position of the table:
+               
+                current_row = ""
+                current_cell = ""
+                row_number = 0
+                cell_number = 0
+                // document.getElementById("supplier").value = result[17]
+                // document.getElementById("invoice_number").value = result[32]
+                // order_number = result[55].split(" ")
+                // document.getElementById("order_number").value = order_number[1]
+                var table = `<form method="post" action="/excel" ><table id="invoice_table"><tr hidden>`
+                await input_text.forEach(newrow)
+                table +=`</td></tr></table></form>`
+                console.log(table)
+                res.send(table);
+
+                    function newrow(item, index){
+                        
+                      if(check_word(item, "AP")==true || check_word(item, "iPad")==true || check_word(item, "PM")==true ){
+                            table += `</tr><tr>`  
+                            row_number++
+                            cell_number = 0
+                            table += `<td>` 
+                            cell_number++
+                            
+                            table += `<div class="autocomplete" ><input  id='${row_number}_${cell_number}' name='r${row_number}_c${cell_number}a' type="text" placeholder="SKU"></div><br>`;       
+                            table += `<div class="autocomplete" ><input  id='${row_number}_${cell_number}b' name='r${row_number}_c${cell_number}' type="text" placeholder="Part Name"></div>`;       
+                       
+                            // autocomplete(document.getElementById(`${row_number}_${cell_number}`), sku_code);
+                            // autocomplete(document.getElementById(`${row_number}_${cell_number}b`), part_name);
+                            table += `</td><td>` 
+                            cell_number++
+                            table+= `<input type='text' name='r${row_number}_c${cell_number}' value='${item}' hidden>${item}`;
+                            table += `</td><td>` 
+                            cell_number++   
+                        }
+                        
+                        else if(check_word(item, " ")==true|| check_word(item, "Order")==true || check_word(item, "Incoterm")==true || check_word(item, "HS Code:")==true){
+                          //NIE WYPISUJ
+                        }
+                        else if (check_word(item, "€")==true || item>0 && cell_number>3 && row_number!=0) {
+                            table += `</td><td>` 
+                            cell_number++
+                            table += `<input type='text' name='r${row_number}_c${cell_number}' value='${item}' hidden>${item}`;
+                        }
+                        else if (row_number!=0){
+                            table += `<input type='text' name='r${row_number}_c${cell_number}' value='${item}' hidden>${item}`;
+                        }
+                        
+                        // alert(i)
+                        // alert(row.innerHTML)
+                      
+                    
+                // Insert new cells (<td> elements) at the 1st and 2nd position of the "new" <tr> element:
+               
+               
+
+                // Add some text to the new cells:
+               
+                    }
+             
+            }
+            function check_word (input, goal){
+                var corect = 0
+                var input_word= ""
+                if (input.length<goal.length){
+                    return false
+                }
+                else{
+                    for(i=0; i<goal.length; i++){
+                        input_word+=input.charAt(i)
+                    }
+                }
+                
+                if(input_word==goal){
+                        return true
+                    }
+                    else{
+                        return false
+                    }
+            
+            }
+            
+        
+
+      
+    
+    
+    pdf_main()
 });
 
 app.post("/excel", (req, res) => {
