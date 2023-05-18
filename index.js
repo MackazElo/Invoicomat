@@ -7,6 +7,7 @@ const bodyParser = require("body-parser")
 const { stringify } = require("querystring")
 var database = require('./database');
 const { contains } = require("jquery");
+const { SlowBuffer } = require("buffer");
 
  
 
@@ -34,7 +35,7 @@ app.post("/extract-text", (req, res) => {
             return new Promise((resolve, reject) => {
                 var query = `INSERT INTO mobileparts (id, supplier_code, sku) VALUES ("", "${supplier}", "${sku}")`;
                         database.query(query, function(error, data){
-                            console.log("SKU DB updated")
+                            // console.log("SKU DB updated")
                         
                             resolve(sku)
                         })
@@ -45,7 +46,7 @@ app.post("/extract-text", (req, res) => {
             return new Promise((resolve, reject) => {
                     var splited = stringify(val[0])
                     splited = splited.split("=")
-                    console.log("SKU found")
+                    // console.log("SKU found")
                   
                     resolve(splited[1])
                         })
@@ -63,6 +64,36 @@ app.post("/extract-text", (req, res) => {
         console.error('Error:', error);
     }
     }
+    async function get_name(sku) {
+        sku = String(sku)
+        sku = sku.replace(/%2F/g, "/");
+        function fetch_name(sku) {
+            return new Promise((resolve, reject) => {
+            var query = `SELECT Name FROM sku_list WHERE SKU = "${sku}"`;
+                    database.query(query, function(error, data){
+                            var splited = stringify(data[0])
+                            splited = splited.split("=")
+                            // console.log(splited[1])
+                            var result = String(splited[1])
+                            result = result.replace(/%20/g, " ");
+                            result = result.replace(/%2F/g, "/");
+                            
+                            // console.log(result)
+                            resolve(splited[1])
+                            
+                        });
+            });
+        }
+    try {
+        var data = await fetch_name(sku);
+       
+        return(data)
+    } catch (error) {
+        console.error('Error:', error);
+    }
+    }
+
+
     async function pdf_main(){
     if (!req.files && !req.files.pdfFile) {
         res.status(400);
@@ -136,7 +167,22 @@ app.post("/extract-text", (req, res) => {
               
                    
                     for(i=1; i<row_number; i++){
-                        content[i][1]=await get_sku(content[i][0], "")
+                        
+                        corretct_sku=await get_sku(content[i][0], "")
+                        correct_name = await get_name(corretct_sku)
+                        
+                        correct_name = String(correct_name)
+                        correct_name = correct_name.replace(/%20/g, " ");
+                        correct_name = correct_name.replace(/%2F/g, "/");
+                        
+                        corretct_sku = String(corretct_sku)
+                        corretct_sku = corretct_sku.replace(/%20/g, " ");
+                        corretct_sku = corretct_sku.replace(/%2F/g, "/");
+
+
+                        content[i][1] = corretct_sku
+                        content[i][2] = correct_name
+                        
                     }
                     console.log(content)
              
@@ -187,7 +233,7 @@ app.post("/excel", (req, res) => {
                 return new Promise((resolve, reject) => {
                     var query = `INSERT INTO mobileparts (id, supplier_code, sku) VALUES ("", "${supplier}", "${sku}")`;
                             database.query(query, function(error, data){
-                                console.log("SKU DB updated")
+                                // console.log("SKU DB updated")
                             
                                 resolve(sku)
                             })
@@ -198,7 +244,7 @@ app.post("/excel", (req, res) => {
                 return new Promise((resolve, reject) => {
                         var splited = stringify(val[0])
                         splited = splited.split("=")
-                        console.log("SKU found")
+                        // console.log("SKU found")
                       
                         resolve(splited[1])
                             })
@@ -253,9 +299,9 @@ app.post("/excel", (req, res) => {
         var quantity = String(eval(`req.body.r${i}_c5`));
         price = price.replace('€ ', "");
         price = price * 6 ;
-        console.log(last_serial)
+        // console.log(last_serial)
         var serials = generate_serial(last_serial, quantity);
-        console.log(last_serial)
+        // console.log(last_serial)
 
         var corretct_sku = await (get_sku(supplier, sku))
 
@@ -276,7 +322,7 @@ app.post("/excel", (req, res) => {
    setTimeout(() => {  make_file(); }, 5000);
     function make_file(){
     const file = `${__dirname}/Excel2.xls`;
-    console.log(file)
+    // console.log(file)
     res.download(file); // Set disposition and send it.
     }
 
