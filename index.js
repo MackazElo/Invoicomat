@@ -134,14 +134,15 @@ app.post("/extract-text", (req, res) => {
                         
                       if(check_word(item, "AP")==true || check_word(item, "iPad")==true || check_word(item, "PM")==true ){
                             content.push(subcontent)
-                            subcontent = []
+                            subcontent = ["", "", "", "", "", "", "", ""]
                             row_number++
-                            cell_number++
-                            subcontent.push(item)
-                            cell_number++
-                            subcontent.push("")
-                            cell_number++
-                            subcontent.push("Name")
+                            
+                            subcontent[0]=item
+                            
+                            subcontent[1]="sku"
+                            
+                            subcontent[2]="Name"
+                            cell_number=3
 
                             
                         }
@@ -149,26 +150,29 @@ app.post("/extract-text", (req, res) => {
                         else if(check_word(item, " ")==true|| check_word(item, "Order")==true || check_word(item, "Incoterm")==true || check_word(item, "HS Code:")==true){
                           //NIE WYPISUJ
                         }
-                        else if (check_word(item, "€")==true || item>0 && cell_number>3 && row_number!=0) {
+                        else if (check_word(item, "€")==true && cell_number<5) {
                             cell_number++
-                           subcontent.push(item)
+                            subcontent[5]=item
                         }
-                        else if (cell_number!=0){
-                            if(cell_number==prevoius_cell){
-                                subcontent[prevoius_cell]+=item
-                            }
-                            else{
-                                cell_number++
-                                prevoius_cell=cell_number
-                                subcontent.push(item)
-                            }
+                        else if (item>0 && cell_number==4) {
+                            cell_number++
+                            subcontent[4]=item
+                        }
+                        else if (cell_number == 3){
+                            subcontent[3]+=item
+                        }
+                        else{
+                            // console.log(item)
+                                cell_number++  
+                        }
                         }                                   
-                    }
+                cell_number == 4
+                
               
                    
                     for(i=1; i<row_number; i++){
                         
-                        corretct_sku=await get_sku(content[i][0], "")
+                        corretct_sku= await get_sku(content[i][0], "")
                         correct_name = await get_name(corretct_sku)
                         
                         correct_name = String(correct_name)
@@ -184,8 +188,34 @@ app.post("/extract-text", (req, res) => {
                         content[i][2] = correct_name
                         
                     }
-                    console.log(content)
-             
+                    // console.log(content)
+                    async function create_table(){
+                            var table = `<form method="post" action="/excel" ><table id="invoice_table">`
+                            
+                            table +=`<tr><th>SKU/Name</th><th>Supplier Code</th><th>Description</th><th>Price</th><th>Quantity</th></tr>`
+                            for(i=1;i<row_number; i++){
+                                if(content[i][1]==content[i][2]){
+                                    // console.log("empty")
+                                    content[i][1]=""
+                                    content[i][2]=""
+                                }
+                                table +=`<tr><td><div class="autocomplete" ><input  id='${i}_0' name='r${i}_c0a' type="text"  value='${content[i][1]}'  placeholder="SKU"></div><br>`       
+                                table +=`<div class="autocomplete" ><input  id='${i}_0b' name='r${i}_c0' type="text"  value='${content[i][2]}'  placeholder="Part Name"></div></td>`
+                                table +=`<td><input type='text' name='r${i}_c1' value='${content[i][0]}' hidden>${content[i][0]}</td>`
+                                table +=`<td><input type='text' name='r${i}_c1' value='${content[i][3]}' hidden>${content[i][3]}</td>`
+                                table +=`<td><input type='text' name='r${i}_c1' value='${content[i][4]}' hidden>${content[i][5]}</td>`
+                                table +=`<td><input type='text' name='r${i}_c1' value='${content[i][5]}' hidden>${content[i][4]}</td></tr>`
+                                
+                            }
+                            table += `</table></form>`
+                            // console.log(table)
+                            // console.log(stringify(table))
+                            return table
+                           
+                    }
+                    var html_to_send = await create_table()
+                    // console.log(html_to_send)
+                    res.send(html_to_send);
             }
             function check_word (input, goal){
                 var corect = 0
@@ -355,3 +385,4 @@ app.post("/excel", (req, res) => {
 
 app.listen(5000);
 console.log("Started at port 5000");
+

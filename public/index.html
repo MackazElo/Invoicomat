@@ -78,8 +78,7 @@ table, tr, td{
     <div id="pdf_input">
         <input type="file" id="inpFile">
         <button type="button" id="btnUpload" onclick="button_upload()">Upload</button>
-        <button type="button" id="btnConvert" onclick="insert_name()" hidden>Convert</button>
-        <button type="button" id="btnMake" onclick="make_excel()" hidden>Download</button>
+        <button type="button" id="btnMake" onclick="make_excel()" >Download</button>
 
         <br>
         <br>
@@ -91,12 +90,12 @@ table, tr, td{
 
             const resultText = document.getElementById("resultText");
 
-            function button_upload(){
+            async function button_upload(){
                 const formData = new FormData();
 
-                formData.append("pdfFile", inpFile.files[0]);
+                await formData.append("pdfFile", inpFile.files[0]);
                 
-                fetch("/extract-text", {
+                await fetch("/extract-text", {
                     method: "post",
                     body: formData
                 }).then(response => {
@@ -105,8 +104,9 @@ table, tr, td{
                     resultText.innerHTML = extractedText.trim();
                 });
                 
-                setTimeout(() => {  extract_fromtext(); }, 300);
-                document.getElementById("btnConvert").hidden = false
+                insert_name()
+                
+            document.getElementById("btnMake").hidden = false
                 // document.getElementById("btnUpload").hidden = true
                 
                 
@@ -133,103 +133,7 @@ table, tr, td{
             <input type="submit" id="submit_form" hidden>
         </form>
         
-           
-        <script>
-            function extract_fromtext(){
-                const input_text = document.getElementById("resultText")
-                const result = input_text.value.split(/\r?\n/);
-                document.getElementById("shop_input").value = result[8]
-                // Find a <table> element with id="myTable":
-                var table = document.getElementById("invoice_table");
-
-                // Create an empty <tr> element and add it to the 1st position of the table:
-               
-                current_row = ""
-                current_cell = ""
-                row_number = 0
-                cell_number = 0
-                document.getElementById("supplier").value = result[17]
-                document.getElementById("invoice_number").value = result[32]
-                order_number = result[55].split(" ")
-                document.getElementById("order_number").value = order_number[1]
-                result.forEach(newrow)
-                    function newrow(item, index){
-                        
-                        if(current_row==""){                    
-                            current_row = table.insertRow(-1);
-                        }
-
-                        else if(check_word(item, "AP")==true || check_word(item, "iPad")==true || check_word(item, "PM")==true ){
-                            current_row = table.insertRow(-1);     
-                            row_number++
-                            cell_number = 0
-                            current_cell = current_row.insertCell(-1)
-                            cell_number++
-                            
-                            current_cell.innerHTML+= `<div class="autocomplete" ><input  id='${row_number}_${cell_number}' name='r${row_number}_c${cell_number}a' type="text" placeholder="SKU"')"></div><br>`;       
-                            current_cell.innerHTML+= `<div class="autocomplete" ><input  id='${row_number}_${cell_number}b' name='r${row_number}_c${cell_number}' type="text" placeholder="Part Name"></div>`;       
-                       
-                            autocomplete(document.getElementById(`${row_number}_${cell_number}`), sku_code);
-                            autocomplete(document.getElementById(`${row_number}_${cell_number}b`), part_name);
-                            current_cell = current_row.insertCell(-1)
-                            cell_number++
-                            current_cell.innerHTML+= `<input type='text' name='r${row_number}_c${cell_number}' value='${item}' hidden>${item}`;
-                            current_cell = current_row.insertCell(-1)
-                            cell_number++   
-                        }
-                        
-                        else if(check_word(item, " ")==true| check_word(item, "Order")==true || check_word(item, "Incoterm")==true || check_word(item, "HS Code:")==true){
-                          //NIE WYPISUJ
-                        }
-                        else if (check_word(item, "€")==true || item>0 && cell_number>3) {
-                            current_cell = current_row.insertCell(-1)
-                            cell_number++
-                            current_cell.innerHTML+= `<input type='text' name='r${row_number}_c${cell_number}' value='${item}' hidden>${item}`;
-                        }
-                        else{
-                            current_cell.innerHTML+= `<input type='text' name='r${row_number}_c${cell_number}' value='${item}' hidden>${item}`;
-                        }
-                        
-                        // alert(i)
-                        // alert(row.innerHTML)
-                      
-                    
-                // Insert new cells (<td> elements) at the 1st and 2nd position of the "new" <tr> element:
-               
-               
-
-                // Add some text to the new cells:
-               
-                
-                }
-                table.deleteRow(0);
-                table.deleteRow(row_number-1);
-                table.deleteRow(row_number-2);
-                
-             
-            }
-            function check_word (input, goal){
-                var corect = 0
-                var input_word= ""
-                if (input.length<goal.length){
-                    return false
-                }
-                else{
-                    for(i=0; i<goal.length; i++){
-                        input_word+=input.charAt(i)
-                    }
-                }
-                
-                if(input_word==goal){
-                        return true
-                    }
-                    else{
-                        return false
-                    }
-
-            }
-            
-        </script>
+ 
        <script src="../excel.js">
 
        </script>
@@ -345,29 +249,8 @@ table, tr, td{
             document.getElementById("max_rows").value = max_rows
 
             for (i=1; i<=max_rows; i++){
-                target_sku = document.getElementById(`${i}_1`).value
-                j = 0
-                current = sku_code[j]
-                if(target_sku==""){
-                    document.getElementById(`${i}_1b`).value = "Nie znaleziony"
-                }
-                else{
-                while(target_sku!=current){
-                    j++
-                    current = sku_code[j]
-                    if(j>sku_code.length){
-                        target_sku=""
-                        current = ""
-                    }
-                }
-                if(target_sku==""){
-                    document.getElementById(`${i}_1b`).value = "Nie znaleziony"
-                }
-                else{
-                    
-                document.getElementById(`${i}_1b`).value = part_name[j]
-                }
-            }
+              autocomplete(document.getElementById(`${i}_0`), sku_code)
+              autocomplete(document.getElementById(`${i}_0b`), part_name)
             }
             document.getElementById("btnMake").hidden = false
             
