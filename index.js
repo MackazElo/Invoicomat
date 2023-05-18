@@ -6,6 +6,7 @@ const bodyParser = require("body-parser")
 
 const { stringify } = require("querystring")
 var database = require('./database');
+const { contains } = require("jquery");
 
  
 
@@ -74,7 +75,7 @@ app.post("/extract-text", (req, res) => {
           
                 var input_text = pdf_as_text.text
                  input_text = input_text.split(/\r?\n/);
-                 console.log(input_text)
+                //  console.log(input_text)
                 // document.getElementById("shop_input").value = result[8]
                 // Find a <table> element with id="myTable":
                 // var table = document.getElementById("invoice_table");
@@ -85,61 +86,59 @@ app.post("/extract-text", (req, res) => {
                 current_cell = ""
                 row_number = 0
                 cell_number = 0
+                prevoius_cell = 0
                 // document.getElementById("supplier").value = result[17]
                 // document.getElementById("invoice_number").value = result[32]
                 // order_number = result[55].split(" ")
                 // document.getElementById("order_number").value = order_number[1]
-                var table = `<form method="post" action="/excel" ><table id="invoice_table"><tr hidden>`
+                let content = []
+                let subcontent = []
+                // var table = `<form method="post" action="/excel" ><table id="invoice_table"><tr hidden>`
                 await input_text.forEach(newrow)
-                table +=`</td></tr></table></form>`
-                console.log(table)
-                res.send(table);
-
-                    function newrow(item, index){
+                content.push(subcontent)
+                // table +=`</td></tr></table></form>`
+                // console.log(table)
+                // res.send(table);
+                    async function newrow(item, index){
                         
                       if(check_word(item, "AP")==true || check_word(item, "iPad")==true || check_word(item, "PM")==true ){
-                            table += `</tr><tr>`  
+                            content.push(subcontent)
+                            subcontent = []
                             row_number++
-                            cell_number = 0
-                            table += `<td>` 
                             cell_number++
-                            var corretct_sku = get_sku(item, "")
+                            subcontent.push(item)
+                            cell_number++
+                            subcontent.push("")
+                            cell_number++
+                            subcontent.push("Name")
+
                             
-                            table += `<div class="autocomplete" ><input  id='${row_number}_${cell_number}' name='r${row_number}_c${cell_number}a' type="text" value='${corretct_sku}' placeholder="SKU" onclick="autocomplete(document.getElementById('${row_number}_${cell_number}'), sku_code);"></div><br>`;       
-                            table += `<div class="autocomplete" ><input  id='${row_number}_${cell_number}b' name='r${row_number}_c${cell_number}' type="text" placeholder="Part Name" onclick="autocomplete(document.getElementById('${row_number}_${cell_number}b'), part_name);"></div>`;       
-                       
-                            // autocomplete(document.getElementById(`${row_number}_${cell_number}`), sku_code);
-                            // autocomplete(document.getElementById(`${row_number}_${cell_number}b`), part_name);
-                            table += `</td><td>` 
-                            cell_number++
-                            table+= `<input type='text' name='r${row_number}_c${cell_number}' value='${item}' hidden>${item}`;
-                            table += `</td><td>` 
-                            cell_number++   
                         }
                         
                         else if(check_word(item, " ")==true|| check_word(item, "Order")==true || check_word(item, "Incoterm")==true || check_word(item, "HS Code:")==true){
                           //NIE WYPISUJ
                         }
                         else if (check_word(item, "€")==true || item>0 && cell_number>3 && row_number!=0) {
-                            table += `</td><td>` 
                             cell_number++
-                            table += `<input type='text' name='r${row_number}_c${cell_number}' value='${item}' hidden>${item}`;
+                           subcontent.push(item)
                         }
-                        else if (row_number!=0){
-                            table += `<input type='text' name='r${row_number}_c${cell_number}' value='${item}' hidden>${item}`;
-                        }
-                        
-                        // alert(i)
-                        // alert(row.innerHTML)
-                      
-                    
-                // Insert new cells (<td> elements) at the 1st and 2nd position of the "new" <tr> element:
-               
-               
-
-                // Add some text to the new cells:
-               
+                        else if (cell_number!=0){
+                            if(cell_number==prevoius_cell){
+                                subcontent[prevoius_cell]+=item
+                            }
+                            else{
+                                cell_number++
+                                prevoius_cell=cell_number
+                                subcontent.push(item)
+                            }
+                        }                                   
                     }
+              
+                   
+                    for(i=1; i<row_number; i++){
+                        content[i][1]=await get_sku(content[i][0], "")
+                    }
+                    console.log(content)
              
             }
             function check_word (input, goal){
