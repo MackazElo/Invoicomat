@@ -91,6 +91,11 @@ table, tr, td{
             const resultText = document.getElementById("resultText");
 
             async function button_upload(){
+              if(document.getElementById("inpFile").value==""){
+                alert("Nie wybrano pliku")
+              }
+              
+              else {
                 const formData = new FormData();
 
                 await formData.append("pdfFile", inpFile.files[0]);
@@ -110,7 +115,7 @@ table, tr, td{
             document.getElementById("btnMake").hidden = false
                 // document.getElementById("btnUpload").hidden = true
                 
-                
+              }
             };
         </script>
         <script>
@@ -118,15 +123,40 @@ table, tr, td{
               document.getElementById('invoice_table').value = document.getElementById('invoice_table').rows.length;
                 document.getElementById("invoice_form").submit()
             }
+            function auto_name(sku){
+              target_sku = document.getElementById(sku+"a").value
+              
+              current = ""
+               j = 0
+                if(target_sku==""){
+                    document.getElementById(`${i}_1b`).value = "Nie znaleziony"
+                }
+                else{
+                while(target_sku!=current){
+                    j++
+                    current = sku_code[j]
+                    if(j>sku_code.length){
+                        target_sku=""
+                        current = ""
+                    }
+                
+               
+                    
+                }
+                
+                document.getElementById(`${sku}b`).value = part_name[j]
+            }
+            
+            
+
+
+              
+            }
         </script>
     </div>
     <div id="extractor">
       
       
- 
-       <script src="../excel.js">
-
-       </script>
        <script>
         function autocomplete(inp, arr) {
           /*the autocomplete function takes two arguments,
@@ -238,9 +268,10 @@ table, tr, td{
             var table = document.getElementById("invoice_table");
             var max_rows = table.rows.length;
             document.getElementById("max_rows").value = max_rows
+            
 
             for (i=1; i<=max_rows; i++){
-              autocomplete(document.getElementById(`${i}_0`), sku_code)
+              autocomplete(document.getElementById(`${i}_0a`), sku_code)
               autocomplete(document.getElementById(`${i}_0b`), part_name)
             }
             document.getElementById("btnMake").hidden = false

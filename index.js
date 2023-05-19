@@ -158,7 +158,7 @@ app.post("/extract-text", (req, res) => {
                                     content[i][1]=""
                                     content[i][2]=""
                                 }
-                                table +=`<tr><td><div class="autocomplete" ><input  id='${i}_0' name='r${i}_c0a' type="text"  value='${content[i][1]}'  placeholder="SKU"></div><br>`       
+                                table +=`<tr><td><div class="autocomplete" ><input  id='${i}_0a' name='r${i}_c0a' type="text"  value='${content[i][1]}' onchange="auto_name('${i}_0')"  placeholder="SKU"></div><br>`       
                                 table +=`<div class="autocomplete" ><input  id='${i}_0b' name='r${i}_c0b' type="text"  value='${content[i][2]}'  placeholder="Part Name"></div></td>`
                                 table +=`<td><input type='text' name='r${i}_c1' value='${content[i][0]}' hidden>${content[i][0]}</td>`
                                 table +=`<td><input type='text' name='r${i}_c2' value='${content[i][3]}' hidden>${content[i][3]}</td>`
@@ -166,9 +166,9 @@ app.post("/extract-text", (req, res) => {
                                 table +=`<td><input type='text' name='r${i}_c4' value='${content[i][5]}' hidden>${content[i][4]}</td></tr>`
                                 
                             }
-                            table += ` <input type="text" id="supplier" name="supplier" placeholder="supplier">
-                            <input type="text" id="invoice_number" name="invoice_number" placeholder="invoice_number">
-                            <input type="text" id="order_number" name="order_number" placeholder="order_number">
+                            table += ` <input type="text" id="supplier" name="supplier" placeholder="supplier"hidden>
+                            <input type="text" id="invoice_number" name="invoice_number" placeholder="invoice_number"hidden>
+                            <input type="text" id="order_number" name="order_number" placeholder="order_number"hidden>
                             <input type="text" name="last_serial" placeholder="last_serial">
                             <input type='number' name='max_rows' id='max_rows' hidden>
                                 <input type="submit" id="submit_form" hidden>
@@ -252,12 +252,16 @@ async function mainn(){
         for(i=1; i<max_rows; i++){
         
             var sku = String(eval(`req.body.r${i}_c0a`));
+           
+            sku = sku.replace(/%20/g, " ");
+            sku = sku.replace(/%2F/g, "/");
+
             var name = String(eval(`req.body.r${i}_c0b`));
             var code = String(eval(`req.body.r${i}_c1`));
             var quantity = String(eval(`req.body.r${i}_c3`));
             var price = String(eval(`req.body.r${i}_c4`));
-            console.log(quantity)
-            console.log(price)
+            // console.log(quantity)
+            // console.log(price)
             price = price.replace('€ ', "");
             price = price * 6 ;
             // console.log(last_serial)
@@ -313,6 +317,51 @@ async function mainn(){
     }
     }
     mainn()
+});
+
+app.post("/get_sku_list", (req, res)=>{
+    async function start_fetch(){ 
+    async function fetch_sku() {
+        return new Promise((resolve, reject) => {
+        var query = `SELECT SKU FROM sku_list`;
+                database.query(query, function(error, data){
+                        var splited = stringify(data[0])
+                        splited = splited.split("=")
+                        // console.log(splited[1])
+                        var result = String(splited[1])
+                        result = result.replace(/%20/g, " ");
+                        result = result.replace(/%2F/g, "/");
+                        
+                        // console.log(result)
+                        resolve(splited[1])
+                        
+                    });
+        });
+    }
+    async function fetch_name() {
+        return new Promise((resolve, reject) => {
+        var query = `SELECT Name FROM sku_list`;
+                database.query(query, function(error, data){
+                        var splited = stringify(data[0])
+                        splited = splited.split("=")
+                        // console.log(splited[1])
+                        var result = String(splited[1])
+                        result = result.replace(/%20/g, " ");
+                        result = result.replace(/%2F/g, "/");
+                        
+                        // console.log(result)
+                        resolve(splited[1])
+                        
+                    });
+        });
+    }
+
+    var sku = await fetch_sku()
+    var name = await fetch_name()
+    
+
+}
+
 });
 
 async function get_sku(supplier, sku) {
