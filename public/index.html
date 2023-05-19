@@ -7,8 +7,6 @@
     <title>Invoicomat Beta v1</title>
 </head>
 <body>
-  <h2>Invoicomat Beta v1</h2>
-  <h4>By Maciej Kaźmierczak</h4>
     <style>
         
 * {
@@ -76,12 +74,36 @@ table, tr, td{
   border: 2px solid black;
   border-collapse: collapse;
 }
+#header{
+  position: relative;
+}
+#title, #interface, #help_div{
+  display: inline-block;
+  margin: 30px;
+  overflow: auto;
+}
 </style>
+  <div id='header'>
+        <div id="title">
+          <h2>Invoicomat Beta v1</h2>
+          <h4>By Maciej Kaźmierczak</h4>
+        </div>
+      <div id="interface">
+          <input type="file" id="inpFile">
+          <input id="message" disabled>
+          <br>
+          <br>
+          <button type="button" id="btnUpload" onclick="button_upload()">Upload</button>
+          <button type="button" id="btnMake" onclick="make_excel()" disabled>Download</button>
+      </div>
+        <div id="help_div">
+          
+          <button id="btnHelp" onclick="help_message()">Instrukcja i pomoc</button>
+        </div>
+      
+  </div>
     <div id="pdf_input">
-        <input type="file" id="inpFile">
-        <button type="button" id="btnUpload" onclick="button_upload()">Upload</button>
-        <button type="button" id="btnMake" onclick="make_excel()" >Download</button>
-        <input id="message" disabled>
+        
 
         <br>
         <br>
@@ -94,11 +116,13 @@ table, tr, td{
             const resultText = document.getElementById("resultText");
 
             async function button_upload(){
+              
               if(document.getElementById("inpFile").value==""){
                 alert("Nie wybrano pliku")
               }
               
               else {
+                document.getElementById("btnMake").disabled = false
                 const formData = new FormData();
 
                 await formData.append("pdfFile", inpFile.files[0]);
@@ -155,7 +179,26 @@ table, tr, td{
               document.getElementById("message").value = "Generuje plik, czekaj"
                 document.getElementById("invoice_form").submit()
             }
-           
+           function help_message(){
+             document.getElementById("help_div").innerHTML = `
+             <h4> Jak używać aplikacji:</h4>
+             <ol>
+              <li>Wybierz plik z fakturą PDF</li>
+              <li>Naciśnij przycisk <b>Upload</b></li>
+              <li>Uzupełnij brakujące SKU według opisu produktu. Automatycznie będzie sugerowany poprawny SKU.</li>
+              <li>Nazwa powinna uzupłnić się automatycznie według SKU, jeśli wyświetla się Undefined to oznacza że SKU jest nie znane</li>
+              <li>Uzupełnij <b> last_serial </b> wpisując numer seryjny który jest sugerowany przez orderry. Numer seryjny zdobywamy poprzez utworznie nowego postingu, wybranie dowolnego produktu, kliknięcie genrowania numeru serujnego i kopijąc wyświetlony numer. Okna w orderry mozemy wyłączyć.</li>
+              <li>Klikamy <b>Download</b>. Po chwili rozpocznie się pobieranie pliku <b>Posting.xls</b></li>
+              <li>Pobrany plik importujemy w formularzu postingu w orderry (przycisk import znajduje się obok pola na wpisanie SKU)</li>
+              <li>Orderry uzupełni posting na podstawie danych z arkusza. Produltu których ilość przekracza 20 nie zostaną dodane ze względu na ograniczenia orderry (rozwiązanie work in progress)</li>
+
+              <h5> Wszelkie pytania kierować osobiście do Macieja Kaźmierczak lub na mail maciej.kazmierczak@elektryko.pl</h5> 
+              <a href="https://github.com/MackazElo/Invoicomat/releases/tag/Beta">GitHub</a>
+              
+             `
+
+           }
+
         </script>
     </div>
     <div id="extractor">
