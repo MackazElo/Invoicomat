@@ -8,6 +8,7 @@ const { stringify } = require("querystring")
 var database = require('./database');
 const { contains } = require("jquery");
 const { SlowBuffer } = require("buffer");
+const { Console } = require("console");
 
  
 
@@ -85,13 +86,15 @@ app.post("/extract-text", (req, res) => {
                 let subcontent = []
                 // var table = `<form method="post" action="/excel" ><table id="invoice_table"><tr hidden>`
                 await input_text.forEach(newrow)
+                console.log(input_text[135])
+                // console.log(String(input_text))
                 content.push(subcontent)
                 // table +=`</td></tr></table></form>`
                 // console.log(table)
                 // res.send(table);
                     async function newrow(item, index){
                         
-                      if(check_word(item, "AP")==true || check_word(item, "iPad")==true || check_word(item, "PM")==true ){
+                      if(check_word(item, "AP")==true || check_word(item, "iPad")==true || check_word(item, "PAD")==true){
                             content.push(subcontent)
                             subcontent = ["", "", "", "", "", "", "", ""]
                             row_number++
@@ -102,11 +105,11 @@ app.post("/extract-text", (req, res) => {
                             
                             subcontent[2]="Name"
                             cell_number=3
-
+                            // console.log(item)
                             
                         }
                         
-                        else if(check_word(item, " ")==true|| check_word(item, "Order")==true || check_word(item, "Incoterm")==true || check_word(item, "HS Code:")==true){
+                        else if(check_word(item, " ")==true|| check_word(item, "Order")==true || check_word(item, "Incoterm")==true || check_word(item, "HS Code:")==true || check_word(item, "PM")==true  || check_word(item, "WH")==true ){
                           //NIE WYPISUJ
                         }
                         else if (check_word(item, "€")==true && cell_number<5) {
@@ -129,7 +132,7 @@ app.post("/extract-text", (req, res) => {
                 
               
                    
-                    for(i=1; i<row_number; i++){
+                    for(i=1; i<=row_number; i++){
                         
                         corretct_sku= await get_sku(content[i][0], "")
                         correct_name = await get_name(corretct_sku)
@@ -149,10 +152,10 @@ app.post("/extract-text", (req, res) => {
                     }
                     // console.log(content)
                     async function create_table(){
-                            var table = `<form method="post" id="invoice_form" action="/excel" ><table id="invoice_table">`
+                            var table = `<form method="post" id="invoice_form" action="/excel" autocomplete="off"><table id="invoice_table">`
                             
                             table +=`<tr><th>SKU/Name</th><th>Supplier Code</th><th>Description</th><th>Price</th><th>Quantity</th></tr>`
-                            for(i=1;i<row_number; i++){
+                            for(i=1;i<=row_number; i++){
                                 if(content[i][1]==content[i][2]){
                                     // console.log("empty")
                                     content[i][1]=""
@@ -284,10 +287,10 @@ async function mainn(){
     }
 
      await prepare_content()
-    workbook.write('Excel2.xls')
+    workbook.write('Posting.xls')
    setTimeout(() => {  make_file(); }, 5000);
     function make_file(){
-    const file = `${__dirname}/Excel2.xls`;
+    const file = `${__dirname}/Posting.xls`;
     // console.log(file)
     res.download(file); // Set disposition and send it.
     }
@@ -320,47 +323,74 @@ async function mainn(){
 });
 
 app.post("/get_sku_list", (req, res)=>{
+    
+    sku_list = []
     async function start_fetch(){ 
     async function fetch_sku() {
         return new Promise((resolve, reject) => {
-        var query = `SELECT SKU FROM sku_list`;
-                database.query(query, function(error, data){
-                        var splited = stringify(data[0])
-                        splited = splited.split("=")
-                        // console.log(splited[1])
-                        var result = String(splited[1])
-                        result = result.replace(/%20/g, " ");
-                        result = result.replace(/%2F/g, "/");
-                        
-                        // console.log(result)
-                        resolve(splited[1])
-                        
-                    });
-        });
-    }
+            var query = `SELECT SKU FROM sku_list`;
+                    database.query(query, function(error, data){
+                            data.forEach(next_field)
+    
+                            async function next_field(item, index){
+                                var splited = stringify(item)
+                                splited = splited.split("=")
+                                // console.log(splited[1])
+                                var result = String(splited[1])
+                                result = result.replace(/%20/g, " ");
+                                result = result.replace(/%2F/g, "/");
+                                // console.log(result)
+                                // console.log(result)
+                                sku_list.push(result)
+                       
+                            
+                            // console.log(result)
+                            resolve(result)
+                            }   
+                        });
+            });
+        }
+
+    var sku = await fetch_sku()
+    res.send(sku_list);
+
+}
+start_fetch()
+
+});
+app.post("/get_name_list", (req, res)=>{
+    
+    name_list = []
+    async function start_fetch(){ 
     async function fetch_name() {
         return new Promise((resolve, reject) => {
         var query = `SELECT Name FROM sku_list`;
                 database.query(query, function(error, data){
-                        var splited = stringify(data[0])
-                        splited = splited.split("=")
-                        // console.log(splited[1])
-                        var result = String(splited[1])
-                        result = result.replace(/%20/g, " ");
-                        result = result.replace(/%2F/g, "/");
+                        data.forEach(next_field)
+
+                        async function next_field(item, index){
+                            var splited = stringify(item)
+                            splited = splited.split("=")
+                            // console.log(splited[1])
+                            var result = String(splited[1])
+                            result = result.replace(/%20/g, " ");
+                            result = result.replace(/%2F/g, "/");
+                            // console.log(result)
+                            // console.log(result)
+                            name_list.push(result)
+                   
                         
                         // console.log(result)
-                        resolve(splited[1])
-                        
+                        resolve(result)
+                        }   
                     });
         });
     }
-
-    var sku = await fetch_sku()
     var name = await fetch_name()
-    
+    res.send(name_list);
 
 }
+start_fetch()
 
 });
 
