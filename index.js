@@ -9,6 +9,7 @@ var database = require('./database');
 const { contains } = require("jquery");
 const { SlowBuffer } = require("buffer");
 const { Console } = require("console");
+const workbook = require("excel4node/distribution/lib/workbook");
 
  
 
@@ -86,7 +87,7 @@ app.post("/extract-text", (req, res) => {
                 let subcontent = []
                 // var table = `<form method="post" action="/excel" ><table id="invoice_table"><tr hidden>`
                 await input_text.forEach(newrow)
-                console.log(input_text[135])
+                // console.log(input_text[135])
                 // console.log(String(input_text))
                 content.push(subcontent)
                 // table +=`</td></tr></table></form>`
@@ -154,7 +155,7 @@ app.post("/extract-text", (req, res) => {
                     async function create_table(){
                             var table = `<form method="post" id="invoice_form" action="/excel" autocomplete="off"><table id="invoice_table">`
                             
-                            table +=`<tr><th>SKU/Name</th><th>Supplier Code</th><th>Description</th><th>Price</th><th>Quantity</th></tr>`
+                            table +=`<tr><th>SKU/Name</th><th>Supplier Code</th><th>Description</th><th>Quantity</th><th>Price</th></tr>`
                             for(i=1;i<=row_number; i++){
                                 if(content[i][1]==content[i][2]){
                                     // console.log("empty")
@@ -165,8 +166,8 @@ app.post("/extract-text", (req, res) => {
                                 table +=`<div class="autocomplete" ><input  id='${i}_0b' name='r${i}_c0b' type="text"  value='${content[i][2]}'  placeholder="Part Name"></div></td>`
                                 table +=`<td><input type='text' name='r${i}_c1' value='${content[i][0]}' hidden>${content[i][0]}</td>`
                                 table +=`<td><input type='text' name='r${i}_c2' value='${content[i][3]}' hidden>${content[i][3]}</td>`
-                                table +=`<td><input type='text' name='r${i}_c3' value='${content[i][4]}' hidden>${content[i][5]}</td>`
-                                table +=`<td><input type='text' name='r${i}_c4' value='${content[i][5]}' hidden>${content[i][4]}</td></tr>`
+                                table +=`<td><input type='text' name='r${i}_c3' value='${content[i][4]}' ></td>`
+                                table +=`<td><input type='text' name='r${i}_c4' value='${content[i][5]}' ></td></tr>`
                                 
                             }
                             table += ` <input type="text" id="supplier" name="supplier" placeholder="supplier"hidden>
@@ -214,44 +215,77 @@ app.post("/extract-text", (req, res) => {
     pdf_main()
 });
 
+
+
+app.post("/down", (req, res) => {
+    var file =  String(req.body.file_name);
+    res.download(`${file}.xls`); // Set disposition and send it.
+    
+});
+
+
 app.post("/excel", (req, res) => {
     
        
     
 
 async function mainn(){
-
-        
-        
+    var files = 0
+    var html_to_send2 = "<style>body{font-family: arial;}</style><h2>Kliknij przyciski aby pobrać pliki</h2>"
     var last_serial =  String(req.body.last_serial);
 
             
     var max_rows =  String(req.body.max_rows);
+    
 
-    var excel = require('excel4node');
-    // Create a new instance of a Workbook class
-    var workbook = new excel.Workbook();
+    async function meake_new_file(){
+        var excel = require('excel4node');
+        // Create a new instance of a Workbook class
+        var workbook = new excel.Workbook();
+        return workbook
+    }
+    
+    async function make_new_worksheet(workbook){
+        var style = workbook.createStyle({
+            numberFormat: '##0.00;'
+            });
+        // Add Worksheets to the workbook
+        var worksheet = workbook.addWorksheet('service_operation');
+        // Create a reusable style
+      
+        worksheet.cell(1,1).string("Name").style(style);
+        worksheet.cell(1,2).string("Quantity").style(style);
+        worksheet.cell(1,3).string("Serial numbers").style(style);
+        worksheet.cell(1,4).string("Supplier warranty (value)").style(style);
+        worksheet.cell(1,5).string("Supplier warranty (period)").style(style);
+        worksheet.cell(1,6).string("Purchase price").style(style);
+        worksheet.cell(1,7).string("Zero").style(style);
+        worksheet.cell(1,8).string("Repair").style(style);
+        worksheet.cell(1,9).string("Store").style(style);
 
-    // Add Worksheets to the workbook
-    var worksheet = workbook.addWorksheet('service_operation');
+        return worksheet
+    }
+        
+   async function save_file(workbook, filename){
+        workbook.write(`${filename}.xls`)
+        const file = `${__dirname}/${filename}.xls`;
+        // console.log(file)
+    //    html_to_send2 += `<a href='./${filename}.xls'>${filename}</a><br>` // Set disposition and send it.
+       html_to_send2 += `<form method="post" action='./down'>
+       <input type='hidden' value='${filename}' name='file_name'>
+       <button type="submit">${filename}</button>
+    </form>` // Set disposition and send it.
+     
 
-    // Create a reusable style
-    var style = workbook.createStyle({
-    numberFormat: '##0.00;'
-    });
+   }
 
     // Set value of cell A1 to 100 as a number type styled with paramaters of style
-    worksheet.cell(1,1).string("Name").style(style);
-    worksheet.cell(1,2).string("Quantity").style(style);
-    worksheet.cell(1,3).string("Serial numbers").style(style);
-    worksheet.cell(1,4).string("Supplier warranty (value)").style(style);
-    worksheet.cell(1,5).string("Supplier warranty (period)").style(style);
-    worksheet.cell(1,6).string("Purchase price").style(style);
-    worksheet.cell(1,7).string("Zero").style(style);
-    worksheet.cell(1,8).string("Repair").style(style);
-    worksheet.cell(1,9).string("Store").style(style);
+   
 
-    async function prepare_content(){
+    async function prepare_content(worksheet, workbook, f){
+        var style = workbook.createStyle({
+            numberFormat: '##0.00;'
+            });
         for(i=1; i<max_rows; i++){
         
             var sku = String(eval(`req.body.r${i}_c0a`));
@@ -265,34 +299,63 @@ async function mainn(){
             var price = String(eval(`req.body.r${i}_c4`));
             // console.log(quantity)
             // console.log(price)
-            price = price.replace('€ ', "");
-            price = price * 6 ;
-            // console.log(last_serial)
-            var serials = generate_serial(last_serial, quantity);
+           
+            quantity = quantity - (20*f)
             // console.log(last_serial)
             await get_sku(code, sku)
-    
-            worksheet.cell(i+1,1).string(name).style(style);
-            worksheet.cell(i+1,2).string(quantity).style(style);
-            worksheet.cell(i+1,3).string(serials).style(style);
-            worksheet.cell(i+1,4).string("").style(style);
-            worksheet.cell(i+1,5).string("").style(style);
-            worksheet.cell(i+1,6).number(price).style(style);
-            worksheet.cell(i+1,7).string("0").style(style);
-            worksheet.cell(i+1,8).string("0").style(style);
-            worksheet.cell(i+1,9).string("0").style(style);
-            worksheet.cell(i+1,9).string("0").style(style);
+            q=0
+           
+            while (quantity>20){
+                quantity=quantity-20
+                q++
+            }
+            if(files < q){
+                files=q
+            }
+            if(quantity>0){
+                if (f>0){
+                    quantity = 20
+                }
+                price = price.replace('€ ', "");
+                price = price * 6 ;
+                // console.log(last_serial)
+                var serials = generate_serial(last_serial, quantity);
+                quantity = String(quantity)   
+                worksheet.cell(i+1,1).string(name).style(style);
+                worksheet.cell(i+1,2).string(quantity).style(style);
+                worksheet.cell(i+1,3).string(serials).style(style);
+                worksheet.cell(i+1,4).string("").style(style);
+                worksheet.cell(i+1,5).string("").style(style);
+                worksheet.cell(i+1,6).number(price).style(style);
+                worksheet.cell(i+1,7).string("0").style(style);
+                worksheet.cell(i+1,8).string("0").style(style);
+                worksheet.cell(i+1,9).string("0").style(style);
+                worksheet.cell(i+1,9).string("0").style(style);
+            }
         }
     
     }
-
-     await prepare_content()
-    workbook.write('Posting.xls')
-   setTimeout(() => {  make_file(); }, 5000);
-    function make_file(){
-    const file = `${__dirname}/Posting.xls`;
-    // console.log(file)
-    res.download(file); // Set disposition and send it.
+    f=0; 
+    async function repeatable(){
+        
+    wb = await meake_new_file()
+    ws = await make_new_worksheet(wb)
+     await prepare_content(ws, wb, f)
+     await save_file(wb, `Posting${f}`)
+     f++
+    //  console.log(files)    
+    if(files>=f){
+        repeatable()
+    }
+    else{
+        
+   
+    }
+    }
+    await repeatable()    
+    setTimeout(() => {   send_file(); }, 5000);
+    function send_file(){
+        res.send(html_to_send2)
     }
 
     
@@ -436,6 +499,6 @@ try {
     console.error('Error:', error);
 }
 }
-app.listen(5000);
-console.log("Started at port 5000");
+app.listen(5500);
+console.log("Started at port 5500");
 

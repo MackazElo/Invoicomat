@@ -90,16 +90,18 @@ table, tr, td{
         </div>
       <div id="interface">
           <input type="file" id="inpFile">
-          <input id="message" disabled>
-          <br>
+           <br>
           <br>
           <button type="button" id="btnUpload" onclick="button_upload()">Upload</button>
           <button type="button" id="btnMake" onclick="make_excel()" disabled>Download</button>
+          <div id="Downloads_div"></div>
       </div>
         <div id="help_div">
           
           <button id="btnHelp" onclick="help_message()">Instrukcja i pomoc</button>
         </div>
+        <div id="message" hidden><img src="./Loading_icon.gif" height="150px"><br>Generuje pliki, proszę czekać</div>
+         
       
   </div>
     <div id="pdf_input">
@@ -176,8 +178,19 @@ table, tr, td{
         <script>
             function make_excel(){
               document.getElementById('invoice_table').value = document.getElementById('invoice_table').rows.length;
-              document.getElementById("message").value = "Generuje plik, czekaj"
+              document.getElementById("message").hidden = false
+              document.getElementById("btnUpload").disabled = true
+              document.getElementById("btnMake").disabled = true
                 document.getElementById("invoice_form").submit()
+                
+               
+               
+                 .then(response => {
+                    return response.text();
+                }).then(extractedText => {
+                    document.getElementById("Downloads_div").innerHTML = extractedText.trim();
+                  
+                });
             }
            function help_message(){
              document.getElementById("help_div").innerHTML = `
