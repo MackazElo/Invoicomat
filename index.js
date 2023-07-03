@@ -104,48 +104,102 @@ app.post("/extract-text", (req, res) => {
 
                 await input_text.forEach(newrow)
                 // console.log(input_text[135])
-                console.log(String(input_text))
+                // console.log(String(input_text))
                 content.push(subcontent)
                 // table +=`</td></tr></table></form>`
                 // console.log(table)
                 // res.send(table);
                     async function newrow(item, index){
-                        
-                      if(check_word(item, "AP")==true || check_word(item, "iPad")==true || check_word(item, "PAD")==true || check_word(item, "IPAD")==true || check_word(item, "AW")==true){
-                            content.push(subcontent)
-                            subcontent = ["", "", "", "", "", "", "", ""]
-                            row_number++
+                        if(supplier=="mobileparts"){
                             
-                            subcontent[0]=item
-                            
-                            subcontent[1]="sku"
-                            
-                            subcontent[2]="Name"
-                            cell_number=3
-                            // console.log(item)
-                            
+                            if(check_word(item, "AP")==true || check_word(item, "iPad")==true || check_word(item, "PAD")==true || check_word(item, "IPAD")==true || check_word(item, "AW")==true){
+                                    content.push(subcontent)
+                                    // console.log(subcontent)
+                                    subcontent = ["", "", "", "", "", "", "", ""]
+                                    row_number++
+                                    
+                                    subcontent[0]=item
+                                    
+                                    subcontent[1]="sku"
+                                    
+                                    subcontent[2]="Name"
+                                    cell_number=3
+                                    // console.log(item)
+                                    
+                                }
+                                
+                            else if(check_word(item, " ")==true|| check_word(item, "Order")==true || check_word(item, "Incoterm")==true || check_word(item, "HS Code:")==true || check_word(item, "PM")==true  || check_word(item, "WH")==true ){
+                            //NIE WYPISUJ
+                            }
+                            else if (check_word(item, "€")==true && cell_number<5) {
+                                cell_number++
+                                subcontent[5]=item
+                            }
+                            else if (item>0 && cell_number==4) {
+                                cell_number++
+                                subcontent[4]=item
+                            }
+                            else if (cell_number == 3){
+                                subcontent[3]+=item
+                            }
+                            else{
+                                // console.log(item)
+                                    cell_number++  
+                            }
+                            }        
+                        else if(supplier=="sparepart"){
+                            i=0;
+                            if (cell_number==0){
+                                while(item[i]>0){
+                                    i++
+                                }
+                                if(item[i]==" "){
+                                    if(item[i+1]=="x"){
+                                    var quantity = "" 
+                                    for(j=0; j<i;j++){
+                                        quantity= quantity+item[j]
+                                    }   
+                                    var row = ""
+                                    row = item.split(" x")
+                                        content.push(subcontent)
+                                        subcontent = ["", "", "", "", "", "", "", ""]
+                                        row_number++
+                                        
+                                        
+                                        
+                                        subcontent[1]="sku"
+                                        
+                                        subcontent[2]="Name"
+                                        subcontent[4]=quantity
+                                        subcontent[3]=row[1]
+                                        cell_number=1
+                                    }
+                                }
+                            }
+                            else if(cell_number==1){
+                                max = item.length
+                                if(item[max-3]=="E"&&item[max-2]=="U"&&item[max-1]=="R"){
+                                    euro_row = item.split("EUR")
+                                    // console.log(euro_row)
+                                    
+                                    euro_cell = euro_row[0].split(" ")
+                                    console.log(euro_cell)
+                                    id_tail = euro_cell[1][0]+euro_cell[1][1]+euro_cell[1][2]+euro_cell[1][3]+euro_cell[1][4]
+                                    euro_id = euro_cell[0]+" "+id_tail
+                                    price = euro_cell[1].split(id_tail)
+                                    subcontent[0]=euro_id
+                                    subcontent[5]=price[1]
+                                    cell_number=0
+                                   
+                                }
+                                else{
+                                    subcontent[3]+=item
+                                }
+                            }
+                            console.log(subcontent)
                         }
-                        
-                        else if(check_word(item, " ")==true|| check_word(item, "Order")==true || check_word(item, "Incoterm")==true || check_word(item, "HS Code:")==true || check_word(item, "PM")==true  || check_word(item, "WH")==true ){
-                          //NIE WYPISUJ
-                        }
-                        else if (check_word(item, "€")==true && cell_number<5) {
-                            cell_number++
-                            subcontent[5]=item
-                        }
-                        else if (item>0 && cell_number==4) {
-                            cell_number++
-                            subcontent[4]=item
-                        }
-                        else if (cell_number == 3){
-                            subcontent[3]+=item
-                        }
-                        else{
-                            // console.log(item)
-                                cell_number++  
-                        }
-                        }                                   
-                cell_number == 4
+                    }                     
+                    cell_number == 4
                 
               
                    

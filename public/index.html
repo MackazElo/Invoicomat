@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoicomat Beta v1</title>
+    <title>Invoicomat Beta v1.2</title>
 </head>
 <body>
     <style>
@@ -85,7 +85,7 @@ table, tr, td{
 </style>
   <div id='header'>
         <div id="title">
-          <h2>Invoicomat Beta v1</h2>
+          <h2>Invoicomat Beta v1.2</h2>
           <h4>By Maciej Kaźmierczak</h4>
         </div>
       <div id="interface">
@@ -111,7 +111,7 @@ table, tr, td{
         <br>
         <!-- <textarea style="width: 300px; height: 150px;" id="resultText" placeholder="Your PDF text will appear here..." ></textarea> -->
         <div id="resultText"></div>
-        <div id="Comment"><button onclick="copyComment()">Komentarz</button><div id="resultComment"></div></div>
+        <div id="Comment"><button onclick="copyComment()">Komentarz</button><div id="resultComment" hidden></div></div>
         <script>
             const inpFile = document.getElementById("inpFile");
             const btnUpload = document.getElementById("btnUpload");
@@ -219,7 +219,7 @@ table, tr, td{
              document.getElementById("help_div").innerHTML = `
              <h4> Jak używać aplikacji:</h4>
              <ol>
-              <li>Wybierz plik z fakturą PDF</li>
+              <li>Wybierz plik z fakturą PDF (obsługuje mobileparts.nl i spareparts.dk)</li>
               <li>Naciśnij przycisk <b>Upload</b></li>
               <li>Uzupełnij brakujące SKU według opisu produktu. Automatycznie będzie sugerowany poprawny SKU.</li>
               <li>Nazwa powinna uzupłnić się automatycznie według SKU, jeśli wyświetla się Undefined to oznacza że SKU jest nie znane</li>
