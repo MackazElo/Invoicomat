@@ -111,6 +111,7 @@ table, tr, td{
         <br>
         <!-- <textarea style="width: 300px; height: 150px;" id="resultText" placeholder="Your PDF text will appear here..." ></textarea> -->
         <div id="resultText"></div>
+        <div id="Comment"><button onclick="copyComment()">Komentarz</button><div id="resultComment"></div></div>
         <script>
             const inpFile = document.getElementById("inpFile");
             const btnUpload = document.getElementById("btnUpload");
@@ -141,11 +142,33 @@ table, tr, td{
                 
                 insert_name()
                 
-            document.getElementById("btnMake").hidden = false
+                document.getElementById("btnMake").hidden = false
                 // document.getElementById("btnUpload").hidden = true
                 
               }
             };
+            async function copyComment(){
+              var target = document.getElementById("resultComment")
+              var invoice = document.getElementById("invoice_table")
+              target.innerHTML=""
+              var i = 1
+              while(i<invoice.rows.length-1){
+                if(document.getElementById(`${i}_0a`).value!=""){
+                // alert(document.getElementById(`${i}_0a`).value)
+                // alert(document.getElementById(`r${i}_c4`).value)
+                target.innerHTML+=document.getElementById(`${i}_0a`).value+" - "+document.getElementById(`r${i}_c4`).value+"<br>"
+                }
+                i++
+              }
+              
+              var range = document.createRange();
+              range.selectNode(document.getElementById("resultComment"));
+              window.getSelection().removeAllRanges(); 
+              window.getSelection().addRange(range); 
+              document.execCommand("copy");
+              window.getSelection().removeAllRanges();
+              alert("Komentarz skopiowany")
+            }
             async function get_sku_list(){
               
                 var a =""
@@ -337,10 +360,12 @@ table, tr, td{
 
         }
         function auto_name(sku){
+              setTimeout(()=>{ 
               target_sku = document.getElementById(sku+"a").value
+              console.log(target_sku)
               current = ""
                j = 0
-                if(target_sku==""){
+                if(target_sku==""||target_sku=="undefined"){
                     document.getElementById(`${i}_1b`).value = "Nie znaleziony"
                 }
                 else{
@@ -358,7 +383,8 @@ table, tr, td{
                 
                 document.getElementById(`${sku}b`).value = part_name[j]
             }
-            
+          }
+          , 200)
             
 
 
@@ -376,6 +402,8 @@ table, tr, td{
 
             for (i=1; i<=max_rows; i++){
               autocomplete(document.getElementById(`${i}_0a`), sku_code)
+              // document.getElementById(`${i}_0a`).addEventListener("focus", auto_name(`${i}_0`));
+
               autocomplete(document.getElementById(`${i}_0b`), part_name)
             }
             document.getElementById("btnMake").hidden = false

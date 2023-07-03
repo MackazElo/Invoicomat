@@ -86,16 +86,32 @@ app.post("/extract-text", (req, res) => {
                 let content = []
                 let subcontent = []
                 // var table = `<form method="post" action="/excel" ><table id="invoice_table"><tr hidden>`
+                var supplier = ""
+                input_text.forEach(check_supplier)
+                console.log(supplier)
+                async function check_supplier(item, index){
+                    if(supplier==""){
+                        if(item=="Netherlands "){
+                            supplier="mobileparts"
+                        }
+                        if(item=="SparePart.dk"){
+                            supplier="sparepart"
+                        }
+
+                    }
+                }
+
+
                 await input_text.forEach(newrow)
                 // console.log(input_text[135])
-                // console.log(String(input_text))
+                console.log(String(input_text))
                 content.push(subcontent)
                 // table +=`</td></tr></table></form>`
                 // console.log(table)
                 // res.send(table);
                     async function newrow(item, index){
                         
-                      if(check_word(item, "AP")==true || check_word(item, "iPad")==true || check_word(item, "PAD")==true){
+                      if(check_word(item, "AP")==true || check_word(item, "iPad")==true || check_word(item, "PAD")==true || check_word(item, "IPAD")==true || check_word(item, "AW")==true){
                             content.push(subcontent)
                             subcontent = ["", "", "", "", "", "", "", ""]
                             row_number++
@@ -162,12 +178,12 @@ app.post("/extract-text", (req, res) => {
                                     content[i][1]=""
                                     content[i][2]=""
                                 }
-                                table +=`<tr><td><div class="autocomplete" ><input  id='${i}_0a' name='r${i}_c0a' type="text"  value='${content[i][1]}' onchange="auto_name('${i}_0')"  placeholder="SKU"></div><br>`       
+                                table +=`<tr><td><div class="autocomplete" ><input  id='${i}_0a' name='r${i}_c0a' type="text"  value='${content[i][1]}' onblur="auto_name('${i}_0')"  placeholder="SKU"></div><br>`       
                                 table +=`<div class="autocomplete" ><input  id='${i}_0b' name='r${i}_c0b' type="text"  value='${content[i][2]}'  placeholder="Part Name"></div></td>`
-                                table +=`<td><input type='text' name='r${i}_c1' value='${content[i][0]}' hidden>${content[i][0]}</td>`
-                                table +=`<td><input type='text' name='r${i}_c2' value='${content[i][3]}' hidden>${content[i][3]}</td>`
-                                table +=`<td><input type='text' name='r${i}_c3' value='${content[i][4]}' ></td>`
-                                table +=`<td><input type='text' name='r${i}_c4' value='${content[i][5]}' ></td></tr>`
+                                table +=`<td><input type='text' name='r${i}_c1' id='r${i}_c1' value='${content[i][0]}' hidden>${content[i][0]}</td>`
+                                table +=`<td><input type='text' name='r${i}_c2' id='r${i}_c2' value='${content[i][3]}' hidden>${content[i][3]}</td>`
+                                table +=`<td><input type='text' name='r${i}_c3' id='r${i}_c3' value='${content[i][4]}' ></td>`
+                                table +=`<td><input type='text' name='r${i}_c4' id='r${i}_c4' value='${content[i][5]}' ></td></tr>`
                                 
                             }
                             table += ` <input type="text" id="supplier" name="supplier" placeholder="supplier"hidden>
@@ -499,6 +515,7 @@ try {
     console.error('Error:', error);
 }
 }
-app.listen(5500);
-console.log("Started at port 5500");
+var port = 5500
+app.listen(port);
+console.log("Started at port "+port);
 
