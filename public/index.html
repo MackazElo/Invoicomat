@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <!-- <title>Invoicomat Beta v1.2</title> -->
+  <title>invoice - applefix tools</title>
+
+</head>
+
+<body>
+  <style>
+    :root {
+      --main-background: #fffdfd;
+      --secondary-background: #f2f0f0;
+      --hover-background: #9eceff;
+
+      --main-font: #15131c;
+      --disabled-font: #777777;
+
+      --main-border: #15131c;
+      --secondary-border: #959595;
+
+
+      --main-blue: #1e71ff;
+      --main-green: #006e05;
+      --secondary-green: #1d4821;
+      /* --main-red: #b72b18; */
+      --main-red: #f44336;
+      --secondary-red: #ef9a9a;
+
+
+      
+
+    }
+
+    /* reset css */
+    * {
+      box-sizing: border-box;
+    }
+
+    ::-moz-selection {
+      background: rgb(202, 202, 202);
+    }
+
+    ::selection {
+      background: rgb(174, 174, 174);
+    }
+
+    body,
+    div,
+    dl,
+    dt,
+    dd,
+    ul,
+    ol,
+    li,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    pre,
+    form,
+    fieldset,
+    input,
+    textarea,
+    p,
+    blockquote,
+    th,
+    td {
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto Mono', monospace;
+      min-width: 500px;
+      background-color: var(--main-background);
+    }
+
+    table {
+      border-collapse: collapse;
+      border-spacing: 0;
+    }
+
+    fieldset,
+    img {
+      border: 0;
+    }
+
+    input {
+      border: 1px solid #b0b0b0;
+      padding: 3px 5px 4px;
+      color: #979797;
+      width: 190px;
+    }
+
+    address,
+    caption,
+    cite,
+    code,
+    dfn,
+    th,
+    var {
+      font-style: normal;
+      font-weight: normal;
+    }
+
+    ol,
+    ul {
+      list-style: none;
+    }
+
+    caption,
+    th {
+      text-align: left;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-size: 100%;
+      font-weight: normal;
+    }
+
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+      appearance: textfield;
+    }
+
+    .hidden {
+      visibility: hidden;
+      display: none !important;
+      height: 0 !important;
+      width: 0 !important;
+    }
+
+    /* end reset css */
+    /* ------------------------ */
+
+
+
+    /* navbar */
+    .navbar {
+      background-color: var(--main-border);
+      height: 35px;
+      width: 100%;
+      position: fixed;
+      top: 0;
+      z-index: 1;
+    }
+
+    .navbar-list {
+      display: flex;
+    }
+
+    .navbar-list li {
+      padding: 8px;
+      margin: 0 15px;
+      color: var(--main-background);
+      font-weight: bold;
+    }
+
+    .navbar-link {
+      cursor: pointer;
+
+    }
+
+    .navbar-link {
+      text-decoration: none;
+      color: var(--main-background);
+    }
+
+    .navbar-link:hover {
+      text-decoration: underline;
+    }
+
+    /* end navbar */
+
+
+    .content {
+      margin: 60px 0px;
+    }
+
+    /*the container must be positioned relative:*/
+    .autocomplete {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+
+    .autocomplete.top {
+      /* border-bottom: 1px dashed var(--secondary-border); */
+    }
+
+    /* input {
+      border: 1px solid transparent;
+      background-color: #f1f1f1;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    input[type=text] {
+      background-color: #f1f1f1;
+      width: 100%;
+    }
+
+    input[type=submit] {
+      background-color: DodgerBlue;
+      color: #fff;
+      cursor: pointer;
+    } */
+
+    .autocomplete-items {
+      position: absolute;
+      height: 280px;
+      overflow: scroll;
+      border: 1px solid var(--main-border);
+      /* border-bottom: none; */
+      /* border-top: none; */
+      z-index: 99;
+      /*position the autocomplete items to be the same width as the container:*/
+      width: 212px;
+      top: 100%;
+      left: 4px;
+      right: 0;
+      box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    }
+
+    .autocomplete-items div {
+      padding: 10px 4px;
+      cursor: pointer;
+      background-color: var(--main-background);
+      border-bottom: 1px dashed var(--main-border);
+    }
+
+    /*when hovering an item:*/
+    .autocomplete-items div:hover {
+      background-color: var(--hover-background);
+    }
+
+    /*when navigating through the items using the arrow keys:*/
+    .autocomplete-active {
+      background-color: var(--hover-background) !important;
+      /* color: var(--main-background); */
+    }
+
+    /* table,
+    tr,
+    td {
+      border: 2px solid black;
+      border-collapse: collapse;
+    } */
+
+    table {
+      /* table-layout: fixed; */
+      width: 100%;
+      border-collapse: collapse;
+      /* border: 3px solid purple; */
+    }
+
+    tbody tr:nth-child(odd) {
+      background-color: var(--main-background);
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: var(--secondary-background);
+    }
+
+    th,
+    td {
+      border: 1px solid var(--main-border);
+      /* border-bottom: 2px solid var(--main-border);
+            border-top: 2px solid var(--main-border); */
+
+      /* padding: 0 10px; */
+    }
+
+    .table-input {
+      background-color: transparent;
+      font-size: 1em;
+      color: var(--main-font);
+      /* height: 32px; */
+      font-family: 'Roboto Mono', monospace;
+      /* border: none; */
+      /* height: 100%; */
+      border: 1px solid var(--secondary-border);
+      border-radius: 4px;
+      /* margin: 10px; */
+    }
+       .table-input:hover {
+
+      border: 1px solid var(--main-border);
+
+    }
+
+    thead {
+      background-color: var(--main-font);
+      color: var(--main-background);
+      height: 35px;
+    }
+
+    thead tr th {
+      /* padding: 8px; */
+      text-align: center;
+
+      font-weight: bold;
+      /* color: red; */
+    }
+
+    .table-input:focus {
+      outline: none;
+      background-color: var(--hover-background);
+      border-style: solid;
+      /* font-weight: bold; */
+      color: var(--main-background);
+    }
+    .table-input:focus::-webkit-input-placeholder {
+    /* color: var(--hover-background); */
+    /* font-weight: normal; */
+}
+.table-input::-webkit-input-placeholder {
+  /* color: var(--main-red); */
+  /* text-decoration: dashed; */
+  /* text-decoration: underline; */
+  font-style: italic;
+  /* color: var(--main-background); */
+  /* color: var(--disabled-font); */
+  color: var(--secondary-red);
+}
+.table-input:placeholder-shown {
+    /* border: 1px solid red; Red border only if the input is empty */
+    /* background-color: var(--main-red); */
+    border-color: var(--main-red);
+}
+
+    .price {
+      text-align: center;
+
+      height: 50px;
+      width: 80px;
+      box-sizing: border-box;
+      padding: 0 auto;
+      /* margin: 0; */
+      margin: 10px;
+
+    }
+
+    .price-head {
+      width: 100px;
+    }
+
+    .quantity-head {
+      width: 100px;
+    }
+
+    .quantity {
+      text-align: center;
+
+      height: 50px;
+      width: 80px;
+      box-sizing: border-box;
+      padding: 0 auto;
+      margin: 10px;
+      /* margin: 0; */
+    }
+
+    .code-head {
+      width: 150px;
+    }
+
+    .code {
+      text-align: center;
+    }
+
+    .name-head {
+      width: 220px;
+    }
+
+    .name {
+      width: 212px;
+      box-sizing: border-box;
+      padding: 0 auto;
+      height: 32px;
+      margin: 4px;
+    }
+    .autocomplete.top .name {
+      margin-bottom: 0;
+    }
+    .autocomplete .name {
+      /* margin-top: 2px; */
+    }
+    /* .autocomplete.top .name {
+      margin-bottom: 0;
+      border-bottom: 0;
+    }
+    .autocomplete .name {
+      margin-top: 0;
+      border-top: 0;
+    } */
+
+    /* footer */
+    footer {
+      background-color: black;
+      color: var(--main-background);
+      display: flex;
+      vertical-align: middle;
+      align-items: center;
+      text-align: center;
+      padding-left: 15px;
+      height: 35px;
+      bottom: 0;
+      width: 100%;
+      position: fixed;
+    }
+
+    .footer p {
+      padding: 4px;
+    }
+
+    .footer-link {
+      color: var(--main-background);
+    }
+
+    .footer-link:hover {
+      font-weight: bold;
+    }
+
+    /* end footer */
+
+
+    /* file input */
+    .inpFile-label input {
+      cursor: pointer;
+      font-size: 1em;
+    }
+
+    .drop-container {
+      position: relative;
+      display: flex;
+      gap: 10px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100px;
+      height: 320px;
+      /* border-radius: 34px; */
+      /* background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='black' stroke-width='4' stroke-dasharray='10%2c 10' stroke-dashoffset='9' stroke-linecap='square'/%3e%3c/svg%3e"); */
+      border-radius: 12px;
+      width: 50%;
+      min-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+
+      /* padding: 20px; */
+      /* margin: 0 250px; */
+      border: 1px dashed var(--main-border);
+      color: var(--main-font);
+      /* z-index: 20; */
+      /* cursor: pointer; */
+      transition: background .2s ease-in-out, border .2s ease-in-out;
+      box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+
+      /* background-size: 10px 10px; */
+      /* background-image: repeating-linear-gradient(45deg, var(--secondary-background) 0, var(--secondary-background) 1px, #ffffff 0, #ffffff 50%); */
+
+    }
+
+
+    .drop-container:hover {
+      /* background: #eee; */
+      /* border-color: #111; */
+      /* background-color: var(--secondary-background); */
+    }
+
+
+    .drop-container:hover .drop-title {
+      color: var(--main-font);
+    }
+
+    .drop-container.dragover {
+      /* border-color: #ff0000; */
+      background-color: var(--secondary-background);
+    }
+
+    .drop-title {
+      user-select: none;
+
+      color: var(--main-font);
+      font-size: 1em;
+      font-weight: bold;
+      text-align: center;
+      transition: color .2s ease-in-out;
+    }
+
+    .drop-separator {
+      user-select: none;
+
+    }
+
+    .drop-icon {
+      width: 60px;
+      height: 60px;
+
+    }
+
+    input[type=file] {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 1rem;
+      user-select: none;
+      font-size: 1em;
+      width: 500px;
+      max-width: 100%;
+      color: var(--disabled-font);
+      padding: 0px;
+      background: var(--main-background);
+      border-radius: 8px;
+      border: 1px solid var(--main-border);
+    }
+
+    input[type=file]::file-selector-button {
+      font-family: 'Roboto Mono', monospace;
+
+      margin-right: 16px;
+      border: 0;
+      border-right: 1px solid var(--main-border);
+      background: var(--main-border);
+      padding: 10px 20px;
+      /* border-radius: 6px; */
+      color: var(--main-background);
+      cursor: pointer;
+      transition: all .1s ease-in-out;
+      box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+
+    }
+
+    input[type=file]::file-selector-button:hover {
+      background-color: var(--main-background);
+      color: var(--main-font);
+      /* border-color: var(--main-border); */
+    }
+
+    details {
+      border: 1px solid var(--main-border);
+      /* border-radius: 4px; */
+      padding: 0.5em 0.5em 0;
+      margin: 0 30px;
+      /* width: 100%; */
+    }
+
+    summary {
+      user-select: none;
+      cursor: pointer;
+      font-weight: bold;
+      margin: -0.5em -0.5em 0;
+      padding: 0.5em;
+    }
+
+    details[open] {
+      padding: 0.5em;
+    }
+
+    details[open] summary {
+      border-bottom: 1px dashed var(--main-border);
+      margin-bottom: 0.5em;
+    }
+
+    /* end file input */
+  </style>
+  <nav class="navbar">
+    <ul class="navbar-list">
+      <a class="navbar-link" href="http://192.168.2.222/aft/">
+        <li>home page</li>
+      </a>
+      <a class="navbar-link active-link" href="http://192.168.2.222:3000/">
+        <li>battery benchmark</li>
+      </a>
+      <a class="navbar-link" href="http://192.168.2.222:5000/">
+        <li>invoice editor</li>
+      </a>
+    </ul>
+  </nav>
+
+  <div class="content">
+    <div id='header'>
+
+      <!-- <div id="interface">
+      <input type="file" id="inpFile">
+      <button type="button" id="btnUpload" onclick="button_upload()">Upload</button>
+      <button type="button" id="btnMake" onclick="make_excel()" disabled>Download</button>
+      <div id="Downloads_div"></div>
+    </div> -->
+
+      <div id="interface">
+
+
+        <div for="inpFile" class="drop-container" ondrop="handleDrop(event)" ondragover="handleDragOver(event)"
+          ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)">
+          <svg class="drop-icon" viewBox="0 0 512 512" xml:space="preserve">
+            <g>
+              <g>
+                <path d="M435.2,153.6H320v25.6h102.4v307.2H89.6V179.2H192v-25.6H76.8c-7.066,0-12.8,5.734-12.8,12.8v332.8
+			c0,7.066,5.734,12.8,12.8,12.8h358.4c7.066,0,12.8-5.734,12.8-12.8V166.4C448,159.334,442.266,153.6,435.2,153.6z" />
+              </g>
+            </g>
+            <g>
+              <g>
+                <path d="M341.956,234.249c-4.941-5.052-13.056-5.146-18.099-0.205L268.8,287.898V12.8C268.8,5.734,263.066,0,256,0
+			c-7.066,0-12.8,5.734-12.791,12.8v275.089l-55.057-53.854c-5.043-4.941-13.158-4.847-18.099,0.205
+			c-4.941,5.06-4.855,13.158,0.205,18.099l76.8,75.128c5.043,4.949,13.158,4.855,18.099-0.188l76.595-74.931
+			C346.803,247.407,346.897,239.309,341.956,234.249z" />
+              </g>
+            </g>
+          </svg>
+          <span class="drop-title">drag and drop</span>
+          <span class="drop-separator">or</span>
+          <!-- <span class="drop-title">choose file</span> -->
+          <label for="inpFile" class="inpFile-label">
+            <input type="file" id="inpFile" accept="application/pdf" required>
+          </label>
+        </div>
+        <!-- <button type="button" id="btnUpload" onclick="button_upload()">Upload</button> -->
+        <button type="button" id="btnMake" onclick="make_excel()" disabled>Download</button>
+        <div id="Downloads_div"></div>
+      </div>
+      <details>
+        <summary>how to use</summary>
+        <!-- <h4> Jak używać aplikacji:</h4> -->
+        <ol>
+          <li>Wybierz plik z fakturą PDF (obsługuje mobileparts.nl i spareparts.dk)</li>
+          <li>Naciśnij przycisk <b>Upload</b></li>
+          <li>Uzupełnij brakujące SKU według opisu produktu. Automatycznie będzie sugerowany poprawny SKU.</li>
+          <li>Nazwa powinna uzupłnić się automatycznie według SKU, jeśli wyświetla się Undefined to oznacza że SKU jest
+            nie znane</li>
+          <li>Uzupełnij <b> last_serial </b> wpisując numer seryjny który jest sugerowany przez orderry. Numer seryjny
+            zdobywamy poprzez utworznie nowego postingu, wybranie dowolnego produktu, kliknięcie genrowania numeru
+            serujnego i kopijąc wyświetlony numer. Okna w orderry mozemy wyłączyć.</li>
+          <li>Klikamy <b>Download</b>. Po chwili rozpocznie się pobieranie pliku <b>Posting.xls</b></li>
+          <li>Pobrany plik importujemy w formularzu postingu w orderry (przycisk import znajduje się obok pola na
+            wpisanie SKU)</li>
+          <li>Orderry uzupełni posting na podstawie danych z arkusza. Produltu których ilość przekracza 20 nie zostaną
+            dodane ze względu na ograniczenia orderry (rozwiązanie work in progress)</li>
+        </ol>
+        </br>
+        <h5> Wszelkie pytania kierować osobiście do Macieja Kaźmierczak lub na mail maciej.kazmierczak@elektryko.pl</h5>
+        <a href="https://github.com/MackazElo/Invoicomat/releases/tag/Beta" target="_blank">GitHub</a>
+
+      </details>
+
+
+      <div id="message" hidden><img src="./Loading_icon.gif" height="150px"><br>Generuje pliki, proszę czekać</div>
+    </div>
+
+
+
+    <div id="pdf_input">
+      <!-- <br>
+    <br> -->
+      <!-- <textarea style="width: 300px; height: 150px;" id="resultText" placeholder="Your PDF text will appear here..." ></textarea> -->
+      <div id="resultText"></div>
+      <div id="Comment"><button onclick="copyComment()">Komentarz</button>
+        <div id="resultComment"></div>
+      </div>
+
+    </div>
+    <div id="extractor">
+
+    </div>
+  </div>
+  <footer class="footer">
+    <p>2023 code by</p>
+    <p><a class="footer-link" href="https://github.com/MackazElo">@mackazelo</a></p>
+    <p>and</p>
+    <p><a class="footer-link" href="https://github.com/deadbraindev">@deadbraindev</a></p>
+  </footer>
+
+  <script>
+
+
+
+
+    let inpFile = document.getElementById("inpFile");
+
+
+
+    const btnUpload = document.getElementById("btnUpload");
+
+    const resultText = document.getElementById("resultText");
+    const dropContainer = document.getElementsByClassName("drop-container")[0]
+    console.log(dropContainer.childNodes)
+
+    async function button_upload() {
+
+
+      if (document.getElementById("inpFile").value == "") {
+        console.log("Nie wybrano pliku")
+      }
+
+      else {
+        document.getElementsByClassName('drop-container')[0].style.height = "100px";
+        document.getElementById("btnMake").disabled = false
+        const formData = new FormData();
+        document.getElementsByClassName("drop-icon")[0].remove()
+        document.getElementsByClassName("drop-title")[0].remove()
+        document.getElementsByClassName("drop-separator")[0].remove()
+
+
+        // dropContainer.childNodes[1].remove()
+        // dropContainer.childNodes[2].remove()
+        // dropContainer.childNodes[3].remove()
+
+        // dropContainer.childNodes[4].remove()
+
+        await formData.append("pdfFile", inpFile.files[0]);
+
+        await fetch("/extract-text", {
+          method: "post",
+          body: formData
+        }).then(response => {
+          return response.text();
+        }).then(extractedText => {
+          resultText.innerHTML = extractedText.trim();
+
+        });
+        insert_name()
+        document.getElementById("btnMake").hidden = false
+      }
+    };
+
+
+    function handleDrop(event) {
+      event.preventDefault();
+      var file = event.dataTransfer.files[0];
+
+      if (file.type === 'application/pdf') {
+
+        inpFile.files = event.dataTransfer.files;
+        document.getElementsByClassName('drop-container')[0].classList.remove('dragover');
+        document.getElementsByClassName('drop-container')[0].style.height = "100px";
+
+
+        button_upload()
+
+      } else {
+        console.log("nieprawdilowy plik");
+      }
+    }
+
+    function handleDragOver(event) {
+      event.preventDefault();
+    }
+
+    function handleDragEnter(event) {
+      event.preventDefault();
+      document.getElementsByClassName('drop-container')[0].classList.add('dragover');
+    }
+
+    function handleDragLeave(event) {
+      event.preventDefault();
+      document.getElementsByClassName('drop-container')[0].classList.remove('dragover');
+    }
+
+    inpFile.addEventListener('change', button_upload)
+
+
+    async function copyComment() {
+      var target = document.getElementById("resultComment")
+      var invoice = document.getElementById("invoice_table")
+      target.innerHTML = ""
+      var i = 1
+      while (i < invoice.rows.length - 1) {
+        if (document.getElementById(`${i}_0a`).value != "") {
+          // alert(document.getElementById(`${i}_0a`).value)
+          // alert(document.getElementById(`r${i}_c4`).value)
+          target.innerHTML += document.getElementById(`${i}_0a`).value + " - " + document.getElementById(`r${i}_c4`).value + "<br>"
+        }
+        i++
+      }
+
+      var range = document.createRange();
+      range.selectNode(document.getElementById("resultComment"));
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+      document.execCommand("copy");
+      window.getSelection().removeAllRanges();
+      alert("Komentarz skopiowany")
+    }
+    async function get_sku_list() {
+
+      var a = ""
+      await fetch("/get_sku_list", {
+        method: "post",
+      }).then(response => {
+        return response.text();
+      }).then(extractedText => {
+        a = extractedText.trim();
+
+      });
+
+      return (a)
+    };
+
+    async function get_name_list() {
+
+      var a = ""
+      await fetch("/get_name_list", {
+        method: "post",
+      }).then(response => {
+        return response.text();
+      }).then(extractedText => {
+        a = extractedText.trim();
+
+      });
+      return (a)
+    };
+  </script>
+  <script>
+    function make_excel() {
+      document.getElementById('invoice_table').value = document.getElementById('invoice_table').rows.length;
+      document.getElementById("message").hidden = false
+      // document.getElementById("btnUpload").disabled = true
+      document.getElementById("btnMake").disabled = true
+      document.getElementById("invoice_form").submit()
+
+
+
+        .then(response => {
+          return response.text();
+        }).then(extractedText => {
+          document.getElementById("Downloads_div").innerHTML = extractedText.trim();
+
+        });
+    }
+    function autocomplete(inp, arr) {
+      /*the autocomplete function takes two arguments,
+      the text field element and an array of possible autocompleted values:*/
+      var currentFocus;
+      /*execute a function when someone writes in the text field:*/
+      inp.addEventListener("input", function (e) {
+        var a, b, i, val = this.value;
+        /*close any already open lists of autocompleted values*/
+        closeAllLists();
+        if (!val) { return false; }
+        currentFocus = -1;
+        /*create a DIV element that will contain the items (values):*/
+        a = document.createElement("DIV");
+        a.setAttribute("id", this.id + "autocomplete-list");
+        a.setAttribute("class", "autocomplete-items");
+        /*append the DIV element as a child of the autocomplete container:*/
+        this.parentNode.appendChild(a);
+        /*for each item in the array...*/
+        for (i = 0; i < arr.length; i++) {
+          /*check if the item starts with the same letters as the text field value:*/
+          if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+            /*create a DIV element for each matching element:*/
+            b = document.createElement("DIV");
+            /*make the matching letters bold:*/
+            b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+            b.innerHTML += arr[i].substr(val.length);
+            /*insert a input field that will hold the current array item's value:*/
+            b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+            /*execute a function when someone clicks on the item value (DIV element):*/
+            b.addEventListener("click", function (e) {
+              /*insert the value for the autocomplete text field:*/
+              inp.value = this.getElementsByTagName("input")[0].value;
+              /*close the list of autocompleted values,
+              (or any other open lists of autocompleted values:*/
+              closeAllLists();
+            });
+            a.appendChild(b);
+          }
+        }
+      });
+      /*execute a function presses a key on the keyboard:*/
+      inp.addEventListener("keydown", function (e) {
+        var x = document.getElementById(this.id + "autocomplete-list");
+        if (x) x = x.getElementsByTagName("div");
+        if (e.keyCode == 40) {
+          /*If the arrow DOWN key is pressed,
+          increase the currentFocus variable:*/
+          currentFocus++;
+          /*and and make the current item more visible:*/
+          addActive(x);
+        } else if (e.keyCode == 38) { //up
+          /*If the arrow UP key is pressed,
+          decrease the currentFocus variable:*/
+          currentFocus--;
+          /*and and make the current item more visible:*/
+          addActive(x);
+        } else if (e.keyCode == 13) {
+          /*If the ENTER key is pressed, prevent the form from being submitted,*/
+          e.preventDefault();
+          if (currentFocus > -1) {
+            /*and simulate a click on the "active" item:*/
+            if (x) x[currentFocus].click();
+          }
+        }
+      });
+      function addActive(x) {
+        /*a function to classify an item as "active":*/
+        if (!x) return false;
+        /*start by removing the "active" class on all items:*/
+        removeActive(x);
+        if (currentFocus >= x.length) currentFocus = 0;
+        if (currentFocus < 0) currentFocus = (x.length - 1);
+        /*add class "autocomplete-active":*/
+        x[currentFocus].classList.add("autocomplete-active");
+      }
+      function removeActive(x) {
+        /*a function to remove the "active" class from all autocomplete items:*/
+        for (var i = 0; i < x.length; i++) {
+          x[i].classList.remove("autocomplete-active");
+        }
+      }
+      function closeAllLists(elmnt) {
+        /*close all autocomplete lists in the document,
+        except the one passed as an argument:*/
+        var x = document.getElementsByClassName("autocomplete-items");
+        for (var i = 0; i < x.length; i++) {
+          if (elmnt != x[i] && elmnt != inp) {
+            x[i].parentNode.removeChild(x[i]);
+          }
+        }
+      }
+      /*execute a function when someone clicks in the document:*/
+      document.addEventListener("click", function (e) {
+        closeAllLists(e.target);
+      });
+    }
+
+    /*An array containing all the country names in the world:*/
+
+
+    var part_name = []
+    var sku_code = []
+    async function get_sku_and_name() {
+      var goten_name = await get_name_list()
+      var goten_sku = await get_sku_list()
+      goten_sku = goten_sku.replace(/"/g, '');
+      goten_sku = goten_sku.replace("]", '');
+      goten_sku = goten_sku.replace("[", '');
+      goten_name = goten_name.replace(/"/g, '');
+      goten_name = goten_name.replace("[", '');
+      goten_name = goten_name.replace("]", '');
+      splited_name = goten_name.split(",")
+      splited_sku = goten_sku.split(",")
+      sku_code = splited_sku
+      part_name = splited_name
+
+
+    }
+    function auto_name(sku) {
+      setTimeout(() => {
+        target_sku = document.getElementById(sku + "a").value
+        console.log(target_sku)
+        current = ""
+        j = 0
+        if (target_sku == "" || target_sku == "undefined") {
+          document.getElementById(`${i}_1b`).value = "Nie znaleziony"
+        }
+        else {
+          while (target_sku != current) {
+            j++
+            current = sku_code[j]
+            if (j > sku_code.length) {
+              target_sku = ""
+              current = ""
+            }
+
+
+
+          }
+
+          document.getElementById(`${sku}b`).value = part_name[j]
+        }
+      }, 200)
+    }
+
+    /*initiate the autocomplete function on the "myInput" element, and pass along the countries array as possible autocomplete values:*/
+    async function insert_name() {
+      await get_sku_and_name()
+      var table = document.getElementById("invoice_table");
+      var max_rows = table.rows.length;
+      document.getElementById("max_rows").value = max_rows
+
+
+      for (i = 1; i <= max_rows; i++) {
+        autocomplete(document.getElementById(`${i}_0a`), sku_code)
+        autocomplete(document.getElementById(`${i}_0b`), part_name)
+      }
+      document.getElementById("btnMake").hidden = false
+      document.getElementById("btnConvert").hidden = true
+    }
+  </script>
+</body>
+
+</html>
